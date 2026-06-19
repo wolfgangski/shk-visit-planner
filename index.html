@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>杜塞尔多夫出发｜NRW 加热/热泵/水箱实地拜访路线规划器</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAo9Tch3sYPZ6pD3LMbFK3dQpJMQC1nT7N7P6lrU=" crossorigin=""/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <style>
     :root{--bg:#f6f7f9;--panel:#ffffff;--ink:#16202a;--muted:#5e6a75;--line:#dfe5eb;--accent:#0f6bff;--accent2:#0d9488;--warn:#b45309;--shadow:0 10px 30px rgba(20,30,40,.08);}
     *{box-sizing:border-box} body{margin:0;height:100vh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--ink);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans SC","PingFang SC",sans-serif;}
@@ -22,7 +22,7 @@
 <body>
 <header>
   <h1>NRW 加热类产品实地拜访路线规划器</h1>
-  <p>这份路线是我按 <b>Düsseldorf Hbf</b> 出发，围绕 Gas/Oil、热泵、生活水箱/缓冲水箱、暖气片、加热棒、PV 余电热水和安装链路逐个查资料、核地址、看营业时间后整理出来的线下拜访清单。这里保留了 20 个最值得实地验证的点位，勾选后可以直接生成拜访顺序和 Google Maps 分段导航。</p>
+  <p>这份路线是我按 <b>Düsseldorf 办公室</b> 出发，围绕 Gas（气）/Oil（油）、热泵、生活水箱/缓冲水箱、暖气片、加热棒、PV 余电热水和安装链路利用 AI寻找资料、核查地址、考虑营业时间后整理出来的线下拜访清单。这里保留了 20 个最值得实地验证的点位，勾选后可以直接生成拜访顺序和 Google Maps 分段导航。</p>
 </header>
 <main class="app">
   <section class="sidebar">
@@ -57,7 +57,6 @@
           <p class="micro"><b>周六适合看：</b>ELEMENTS Düsseldorf、Zimmer & Kellermann Düsseldorf、Zimmer & Kellermann Dormagen、Elmer Köln-Bickendorf、ELEMENTS Köln。</p>
           <p class="micro"><b>工作日适合深访：</b>Haus & Wärme、Sally-Energy、Kohlmann & Boddem、Paul SHK、Rasch、Hinz、Dieter Schnorrenberg。</p>
           <p class="micro"><b>my-PV 线索：</b>HEIMKRAFT Bielefeld、ENERGYofSUN Gütersloh、Solarhandel24 / solago Düsseldorf 更适合先电话或邮件联系。</p>
-          <p class="micro"><b>看到 AC ELWA 2 / AC THOR 时重点记：</b>G 1 1/2 Zoll、约 460 mm 加热棒、0-3.5 kW、RJ45/WLAN/RS485/PWM、STB、温度传感器、兼容逆变器列表、售价和库存。</p>
         </div>
         <div class="legend">
           <span>🟦 展厅：看用户表达</span><span>🟩 SHK：看货流/配件</span><span>🟧 安装商：问真实项目</span><span>🟪 能源商：问 PV/WP/储能联动</span>
@@ -94,9 +93,12 @@
     </aside>
   </section>
 </main>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-const leafletFallbacks = ['https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js'];
+const leafletSources = ['https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js','https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'];
+const tileSources = [
+ {url:'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', options:{subdomains:'abcd', maxZoom:19, attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}},
+ {url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', options:{maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}}
+];
 const googleMaxVisitsPerRoute = 4;
 function setMapStatus(message, isError=false){
  const el=document.getElementById('mapStatus');
@@ -117,7 +119,7 @@ function loadScript(src){
 }
 async function ensureLeaflet(){
  if(window.L)return true;
- for(const src of leafletFallbacks){
+ for(const src of leafletSources){
    try{await loadScript(src); if(window.L)return true;}catch(e){}
  }
  return false;
@@ -195,11 +197,27 @@ function researchHtml(p, compact=false){
 function popupHtml(p){const d=detailFor(p);return `<div class="popup"><h3>${p.name}</h3><p><b>类型：</b>${p.type}｜${p.channel}</p><p><b>地址：</b>${p.address}</p>${d.hours?`<p><b>营业：</b>${d.hours}</p>`:''}${d.appointment?`<p><b>预约：</b>${d.appointment}</p>`:''}<p><b>为什么去：</b>${p.why}</p><p><b>现场看：</b>${d.see||p.observe}</p><div class="q"><b>建议问题：</b>${(d.ask&&d.ask[0])||p.questions}</div><p><a href="${googleSearch(p)}" target="_blank" rel="noopener noreferrer">Google Maps</a> · <a href="${osmLink(p)}" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · <a href="${p.source}" target="_blank" rel="noopener noreferrer">来源</a></p></div>`}
 function initMap(){
  map = L.map('map').setView(mapHome, 11);
- L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+ addTileLayer(0);
  L.marker([origin.lat, origin.lng], {icon:pin('#111827')}).addTo(map).bindPopup(`<b>${origin.name}</b><br>${origin.address}<br>出发点`);
  places.forEach(p=>{const m=L.marker([p.lat,p.lng],{icon:pin(icons[p.type]||'#666')}).addTo(map).bindPopup(popupHtml(p));markers.set(p.id,m);});
  updateMarkerStyles();
  setMapStatus('');
+}
+function addTileLayer(index){
+ const source=tileSources[index]||tileSources[0];
+ let errors=0;
+ const layer=L.tileLayer(source.url, source.options).addTo(map);
+ layer.on('loading',()=>setMapStatus('地图加载中...'));
+ layer.on('load',()=>setMapStatus(''));
+ layer.on('tileerror',()=>{
+   errors++;
+   if(errors>=4 && tileSources[index+1]){
+     map.removeLayer(layer);
+     addTileLayer(index+1);
+   }
+ });
+ setTimeout(()=>{if(document.querySelectorAll('.leaflet-tile-loaded').length)setMapStatus('');},2500);
+ return layer;
 }
 function readSelectedIds(){
  try{
