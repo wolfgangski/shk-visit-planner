@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>杜塞尔多夫出发｜NRW 加热/热泵/水箱实地拜访路线规划器</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAo9Tch3sYPZ6pD3LMbFK3dQpJMQC1nT7N7P6lrU=" crossorigin=""/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <style>
+    :root{--bg:#f6f7f9;--panel:#ffffff;--ink:#16202a;--muted:#5e6a75;--line:#dfe5eb;--accent:#0f6bff;--accent2:#0d9488;--warn:#b45309;--shadow:0 10px 30px rgba(20,30,40,.08);}
+    *{box-sizing:border-box} body{margin:0;height:100vh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--ink);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans SC","PingFang SC",sans-serif;}
+    header{padding:22px 28px;background:linear-gradient(135deg,#101827,#1b3765);color:white} h1{margin:0 0 8px;font-size:24px;letter-spacing:.2px} header p{margin:0;color:#d7e2f4;max-width:1120px}
+    .app{flex:1;display:grid;grid-template-columns:430px 1fr;gap:14px;padding:14px;min-height:0;overflow:hidden}
+    .sidebar{display:flex;flex-direction:column;gap:12px;min-height:0}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+    .controls{padding:14px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row.spread{justify-content:space-between}.btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;cursor:pointer;font-weight:650;color:var(--ink);text-decoration:none;display:inline-flex;gap:6px;align-items:center}.btn.primary{background:var(--accent);border-color:var(--accent);color:white}.btn.good{background:#ecfdf5;border-color:#bbf7d0;color:#065f46}.btn.active{background:#e0f2fe;border-color:#7dd3fc;color:#075985}.btn:hover{filter:brightness(.98)}
+    .step{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}.stepNo{display:grid;place-items:center;flex:0 0 26px;height:26px;border-radius:50%;background:#dbeafe;color:#1d4ed8;font-weight:800}.step h2{font-size:16px;line-height:1.25;margin:0}.summary{font-size:12px;color:var(--muted);margin:3px 0 0}.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.filters label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px}.hint{font-size:12px;color:var(--muted);margin-top:10px}.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:12px;font-size:14px}.placePanel{flex:1;min-height:0;display:flex;flex-direction:column}.listHeader{padding:10px 12px 0;font-weight:800;display:flex;justify-content:space-between;gap:8px}.listCount{font-size:12px;color:var(--muted);font-weight:650}.list{flex:1;min-height:0;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px}.empty{padding:22px 12px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:14px;background:#fbfdff}.item{padding:10px;border:1px solid var(--line);border-radius:14px;background:white;cursor:pointer}.item.selected{outline:2px solid rgba(15,107,255,.2);border-color:#91b8ff;background:#f8fbff}.topline{display:flex;justify-content:space-between;gap:10px}.name{font-weight:750;font-size:14px;display:flex;gap:7px;align-items:flex-start}.meta{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.tag{font-size:11px;padding:2px 7px;border-radius:999px;background:#eef2ff;color:#3730a3}.tag.channel{background:#ecfeff;color:#155e75}.tag.priority{background:#fff7ed;color:#9a3412}.addr{font-size:12px;color:var(--muted)}.why{font-size:13px;margin-top:7px;color:#344150}.item input{transform:translateY(3px);flex:0 0 auto}
+    .mapwrap{position:relative;min-height:0}.mapcard{position:relative;height:100%;min-height:0;overflow:hidden}.map{height:100%;min-height:0;border-radius:16px}.mapStatus{position:absolute;inset:18px;z-index:20;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;border:1px dashed #cbd5e1;border-radius:14px;background:rgba(255,255,255,.92);color:var(--muted);font-weight:650}.mapStatus.hidden{display:none}.mapStatus.error{color:#991b1b;background:#fff7f7;border-color:#fecaca}.routePanel{position:absolute;right:16px;top:16px;z-index:500;width:min(430px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:14px}.routePanel h2{font-size:16px;margin:0}.routePanel ol{padding-left:22px;margin:8px 0}.routePanel li{margin:6px 0}.routePanel .small{font-size:12px;color:var(--muted)}.routeStats{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.stat{font-size:12px;border:1px solid var(--line);background:#f8fafc;border-radius:999px;padding:5px 9px;color:#334155}.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.popup h3{margin:0 0 6px;font-size:15px}.popup p{margin:4px 0}.popup .q{font-size:12px;color:#334155;background:#f8fafc;padding:6px;border-radius:8px;margin-top:6px}
+    details{padding:12px 14px} summary{font-weight:750;cursor:pointer}.legend{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}.legend span{font-size:12px;color:var(--muted)}
+    @media(max-width:960px){body{overflow:auto}.app{display:block;grid-template-columns:1fr;height:auto;min-height:0;overflow:visible}.mapcard,.map{height:520px;min-height:520px}.routePanel{position:static;width:auto;margin-top:12px}.mapwrap{display:flex;flex-direction:column}.sidebar{max-height:none}.list{max-height:520px}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>NRW 加热类产品实地拜访路线规划器</h1>
+  <p>以 <b>Düsseldorf Hbf</b> 为出发点，围绕加热源、热泵、生活水箱/缓冲水箱、暖气片、加热棒、PV 余电热水与安装链路，筛选 20 个适合实地拜访/考察的公司。勾选点位后可生成建议拜访顺序和 Google Maps 导航链接。</p>
+</header>
+<main class="app">
+  <section class="sidebar">
+    <div class="card controls">
+      <div class="step">
+        <span class="stepNo">1</span>
+        <div>
+          <h2>选择要拜访的点位</h2>
+          <p class="summary" id="selectionSummary">正在载入推荐点位...</p>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="selectTop10">推荐 10 个</button>
+        <button class="btn" id="selectAll">全选 20 个</button>
+        <button class="btn" id="clearAll">清空</button>
+        <button class="btn" id="showSelected">只看已选</button>
+      </div>
+      <input class="search" id="search" placeholder="搜索：热泵 / SHK / 展厅 / Köln / Düsseldorf / 水箱..." />
+      <div class="filters" id="filters">
+        <label><input type="checkbox" value="展厅" checked> 展厅/陈列</label>
+        <label><input type="checkbox" value="SHK Großhandel" checked> SHK Großhandel</label>
+        <label><input type="checkbox" value="安装商" checked> 安装商</label>
+        <label><input type="checkbox" value="能源系统商" checked> PV/能源系统</label>
+      </div>
+      <p class="hint">勾选会立即更新右侧路线。搜索和筛选只影响列表显示，不会丢掉已经选中的点。</p>
+    </div>
+    <div class="card placePanel">
+      <details open>
+        <summary>使用建议</summary>
+        <div class="hint">建议一次不要超过 6–8 个点。专业渠道优先上午去，安装商最好提前预约，用户家访安排在傍晚或周末更容易。</div>
+        <div class="legend">
+          <span>🟦 展厅：看用户表达</span><span>🟩 SHK：看货流/配件</span><span>🟧 安装商：问真实项目</span><span>🟪 能源商：问 PV/WP/储能联动</span>
+        </div>
+      </details>
+      <div class="listHeader">
+        <span>点位列表</span>
+        <span class="listCount" id="listCount"></span>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+  </section>
+  <section class="mapwrap">
+    <div class="card mapcard">
+      <div id="map" class="map"></div>
+      <div id="mapStatus" class="mapStatus">地图加载中...</div>
+    </div>
+    <aside class="routePanel" id="routePanel">
+      <div class="step">
+        <span class="stepNo">2</span>
+        <div>
+          <h2>查看路线与拜访计划</h2>
+          <p class="summary">顺序会随已选点自动优化，可直接打开分段导航。</p>
+        </div>
+      </div>
+      <div class="routeStats">
+        <span class="stat" id="routeCount">已选 0 个</span>
+        <span class="stat" id="routeDistance">约 0 km</span>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="buildRoute">重新优化</button>
+      </div>
+      <div id="routeOutput"></div>
+    </aside>
+  </section>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const leafletFallbacks = ['https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js'];
+const googleMaxVisitsPerRoute = 4;
+function setMapStatus(message, isError=false){
+ const el=document.getElementById('mapStatus');
+ if(!el)return;
+ el.textContent=message;
+ el.classList.toggle('hidden', !message);
+ el.classList.toggle('error', isError);
+}
+function loadScript(src){
+ return new Promise((resolve,reject)=>{
+   const s=document.createElement('script');
+   s.src=src;
+   s.crossOrigin='';
+   s.onload=resolve;
+   s.onerror=reject;
+   document.head.appendChild(s);
+ });
+}
+async function ensureLeaflet(){
+ if(window.L)return true;
+ for(const src of leafletFallbacks){
+   try{await loadScript(src); if(window.L)return true;}catch(e){}
+ }
+ return false;
+}
+const origin = {name:'Düsseldorf Hbf', address:'Konrad-Adenauer-Platz 14, 40210 Düsseldorf', lat:51.22004, lng:6.79278};
+const places = [
+ {id:'elements-dus',name:'ELEMENTS Düsseldorf-Lierenfeld',city:'Düsseldorf',address:'Lierenfelder Str. 35, 40231 Düsseldorf',lat:51.2127,lng:6.8196,type:'展厅',channel:'展厅/GC Gruppe',priority:1,score:96,source:'https://www.gc-gruppe.de/unternehmen/gottschall-sohn-kg/standorte/elements-duesseldorf-lierenfeld',why:'高价值终端展厅。适合观察 Bad + Heizung + Wasseraufbereitung 如何被包装为家庭舒适系统。',observe:'展厅话术、热水/采暖是否自然串联、是否能接触合作安装商。',questions:'用户来这里时会主动问热泵、PV 余电热水或水箱升级吗？'},
+ {id:'zuk-dus',name:'Zimmer & Kellermann badpunkt Düsseldorf-Lierenfeld',city:'Düsseldorf',address:'Ronsdorfer Str. 135, 40233 Düsseldorf',lat:51.2135,lng:6.8239,type:'SHK Großhandel',channel:'SHK Großhandel + 展厅',priority:1,score:98,source:'https://www.elmer-gruppe.de/zuk-zimmer-und-kellermann-badausstellung-shk-abholmarkt-duesseldorf-lierenfeld',why:'专业渠道核心点。可看安装商采购的水箱、阀件、安全组、暖气片、管件与安装辅材。',observe:'1.5 inch 螺口、水箱接口、加热棒配件、安装商拿货动线。',questions:'PV Heizstab 在这里是常规品、特殊订货，还是几乎没人问？'},
+ {id:'kb-dus',name:'Kohlmann & Boddem',city:'Düsseldorf',address:'Driburger Str. 13, 40472 Düsseldorf',lat:51.2796,lng:6.8065,type:'SHK Großhandel',channel:'小型 Großhandel',priority:2,score:84,source:'https://www.kb-bad.de/',why:'小型专业批发商更可能讲真实采购逻辑，适合补充大集团外的渠道样本。',observe:'安装商常购品类、维修替换件、低价/高价产品差异。',questions:'如果新品牌智能加热棒进入渠道，需要哪些认证、包装和售后承诺？'},
+ {id:'haus-waerme',name:'Haus & Wärme / H&W Haustechnik',city:'Düsseldorf',address:'Höherweg 242, 40231 Düsseldorf',lat:51.2207,lng:6.8214,type:'安装商',channel:'Wärmepumpe / Heizung / Warmwasser',priority:1,score:94,source:'https://hausundwaerme.com/?page_id=285',why:'非常贴近热水和采暖系统。适合聊热泵、暖气、生活热水舒适度与改造项目。',observe:'热泵家庭水箱配置、备用加热、防军团菌、客户决策。',questions:'热泵家庭是否还需要独立智能加热棒？客户愿意为什么价值付费？'},
+ {id:'sally',name:'Sally-Energy',city:'Düsseldorf',address:'Linienstraße 141, 40227 Düsseldorf',lat:51.2101,lng:6.8012,type:'能源系统商',channel:'PV + Speicher + Wärmepumpe',priority:1,score:95,source:'https://sally-energy.de/impressum/',why:'新能源系统整合视角强，适合验证 PV、储能、热泵和热水负载的联动机会。',observe:'PV 余电分配逻辑、储能/Wallbox/热泵优先级、用户系统思维。',questions:'储能设备夜间通过低压 DC 给热水加热的故事，安装商是否能理解并愿意卖？'},
+ {id:'hering',name:'Hans Hering GmbH & Co. KG',city:'Düsseldorf',address:'Roßstr. 47a, 40476 Düsseldorf',lat:51.2443,lng:6.7787,type:'安装商',channel:'老牌 SHK / Gebäudetechnik',priority:2,score:86,source:'https://www.hans-hering-gmbh.de/heizung-klima-duesseldorf',why:'老牌 Gebäudetechnik 公司，适合了解传统 SHK 对 Wärmepumpe、Gas/Oil 替换和热水系统改造的判断。',observe:'老房项目、售后维护、系统保守性、安装边界。',questions:'新型智能加热棒对传统 SHK 来说是机会、风险，还是售后负担？'},
+ {id:'lange',name:'SHK Lange GmbH',city:'Düsseldorf',address:'Dorstener Str. 43-47a, 40472 Düsseldorf',lat:51.2777,lng:6.8077,type:'安装商',channel:'Gas / Öl / Pellet / WP / Solar',priority:2,score:88,source:'https://www.shklange.de/?menu=706',why:'覆盖传统热源与新能源，适合横向比较 Gas/Oil/Pellet/Wärmepumpe/Solar。',observe:'传统热源用户保留/替换路径、辅助电加热机会。',questions:'低成本电热水改造会被推荐给哪些用户？'},
+ {id:'hermanns',name:'H. + A. Hermanns GmbH',city:'Düsseldorf',address:'Am Ökotop 27, 40549 Düsseldorf',lat:51.2374,lng:6.7189,type:'安装商',channel:'SHK + Solar / Speicher',priority:2,score:87,source:'https://www.shk-hermanns.de/?menu=817',why:'老牌 SHK，公开提到 Solarstromspeicher，适合聊光伏自用、热水和传统水暖结合。',observe:'水垢、腐蚀、螺纹、泄漏、STB 复位等售后问题。',questions:'安装商最担心智能加热棒的哪类故障和责任？'},
+ {id:'neotherm',name:'neotherm GmbH',city:'Düsseldorf',address:'Erkrather Str. 401, 40231 Düsseldorf',lat:51.2135,lng:6.8329,type:'能源系统商',channel:'Wärmepumpe + PV + EMS',priority:1,score:92,source:'https://www.waermepumpe.de/verband/unsere-mitglieder/mitglieder/details/10849/',why:'新能源导向强，覆盖热泵、PV、Wallbox、能源管理。适合测试你们 DC/AC 智能加热棒卖点。',observe:'EMS 集成、低压 DC 供电故事、安装商接受度。',questions:'如果产品需要 SHK + Elektro 协作，他们愿意如何分工？'},
+ {id:'badwerk',name:'BADWERK Düsseldorf / Heinrich Schmidt',city:'Düsseldorf',address:'Ringelsweide 28, 40223 Düsseldorf',lat:51.1923,lng:6.7752,type:'展厅',channel:'大型 Bad / SHK 展厅',priority:2,score:82,source:'https://badwerk.de/standorte/duesseldorf',why:'大型展厅，适合观察普通家装用户对热水、浴室、暖气的表达，而非纯技术视角。',observe:'陈列语言、家装导购、舒适性卖点。',questions:'热水系统是否作为用户家装决策的一部分被主动讨论？'},
+ {id:'zuk-neuss',name:'Zimmer & Kellermann Neuss',city:'Neuss',address:'Further Straße 61, 41462 Neuss',lat:51.2146,lng:6.6789,type:'SHK Großhandel',channel:'SHK Abholmarkt + Ausstellung',priority:2,score:85,source:'https://www.elmer-gruppe.de/zimmer-kellermann-shk-abholmarkt-neuss',why:'靠近杜塞，适合顺路补充一个安装商拿货样本。',observe:'Abholmarkt 货架、专业材料、安装商采购高频件。',questions:'Neuss 周边家庭的水箱/采暖改造需求与杜塞是否不同？'},
+ {id:'zuk-dormagen',name:'Zimmer & Kellermann badpunkt Dormagen',city:'Dormagen',address:'Otto-Schott-Straße 1, 41542 Dormagen',lat:51.1077,lng:6.8389,type:'SHK Großhandel',channel:'SHK + 约 700㎡ Badausstellung',priority:1,score:89,source:'https://www.elmer-gruppe.de/zimmer-kellermann-badausstellung-shk-abholmarkt-dormagen',why:'位于杜塞—科隆中间，路线价值高；展厅和 SHK Abholmarkt 结合，适合串联拜访。',observe:'中间带用户/安装商样本，展厅规模，合作 Fachhandwerker 入口。',questions:'能否帮助转发用户调研招募给装过水箱/热泵/PV 的客户？'},
+ {id:'elmer-koeln',name:'Elmer badpunkt + SHK-Abholmarkt Köln-Bickendorf',city:'Köln',address:'Vogelsanger Straße 408, 50827 Köln',lat:50.9586,lng:6.8865,type:'SHK Großhandel',channel:'SHK Großhandel + 展厅',priority:1,score:98,source:'https://www.elmer-gruppe.de/elmer-badausstellung-shk-abholmarkt-koeln-bickendorf',why:'科隆区域最值得去的专业渠道点之一，可同时看展厅和安装商材料流。',observe:'水箱、暖气片、阀件、安全组、SHK 货架与展厅话术。',questions:'PV 余电热水在科隆安装商圈里是否有真实需求？'},
+ {id:'elements-koeln',name:'ELEMENTS Köln',city:'Köln',address:'Widdersdorfer Straße 184, 50825 Köln',lat:50.9459187,lng:6.9048658,type:'展厅',channel:'Bad / Sanitär 展厅',priority:2,score:80,source:'https://www.gc-gruppe.de/unternehmen/kemmerling-kg/standorte/elements-koeln',why:'适合补充科隆终端展厅样本，观察用户如何被引导做浴室和热水相关决策。',observe:'展厅咨询、用户表达、是否能引到 Fachhandwerker。',questions:'高端浴室客户是否关心水箱、热水成本和能源系统？'},
+ {id:'rasch',name:'Rasch Gebäudetechnik',city:'Köln',address:'Köhlstraße 10a / Tor 10, 50827 Köln',lat:50.9739,lng:6.8852,type:'能源系统商',channel:'SHK + Wärmepumpe + PV',priority:1,score:96,source:'https://www.rasch.koeln/waermepumpe-photovoltaik-koeln/',why:'公开强调 Wärmepumpe 与 Photovoltaik 应作为 Gesamtsystem 协调，极适合聊 PV + WP + Warmwasser。',observe:'整体系统规划、PV 余电、热泵、水箱、热水负载优先级。',questions:'热水负载在他们的能源系统方案里是否被量化？'},
+ {id:'paul',name:'Paul SHK',city:'Köln',address:'Poller Kirchweg 118, 51105 Köln',lat:50.9197,lng:6.9979,type:'安装商',channel:'SHK + Elektro + Wärmepumpe',priority:1,score:92,source:'https://paul-shk.de/impressum-paul-shk-koeln/',why:'跨 SHK 与 Elektro，非常适合验证智能加热棒的安装责任边界。',observe:'电气接线、SHK 安装、水箱接口、项目交付责任。',questions:'智能加热棒到底应该由电工、SHK，还是 PV 安装商负责？'},
+ {id:'hinz',name:'Helmut Hinz GmbH & Co.',city:'Köln',address:'Neuer Weyerstraßenweg 5, 50969 Köln',lat:50.9068,lng:6.9405,type:'安装商',channel:'老牌 SHK + Photovoltaik',priority:1,score:91,source:'https://www.wasserwaermeluft.de/webvisitenkarte/helmut-hinz-gmbh-co-wasser-waerme-umwelt',why:'老牌 SHK，同时有 Photovoltaik 内容，适合判断传统 SHK 是否愿意碰智能能源产品。',observe:'老客户基础、改造路径、PV 与水暖结合。',questions:'如果产品来自新品牌，怎样才能进入老牌 SHK 的推荐清单？'},
+ {id:'schnorrenberg',name:'Dieter Schnorrenberg Wärmepumpen-Service',city:'Köln',address:'Im Buchenkamp 67, 51109 Köln',lat:50.9561,lng:7.0847,type:'安装商',channel:'Wärmepumpe 专家',priority:1,score:93,source:'https://www.nibe.eu/de-de/partner-service/dieter-schnorrenberg-warmepumpenservice-ek-51109-koln-service',why:'专注热泵多年，适合深聊热泵系统里的电加热棒、备用热源和军团菌升温逻辑。',observe:'热泵内置 Heizstab vs 外置智能 Heizstab，生活热水策略。',questions:'热泵系统中独立智能加热棒的边界价值在哪里？'},
+ {id:'heizfix',name:'Heizfix GmbH',city:'Pulheim/Köln',address:'Brunnenstraße 6, 50259 Pulheim',lat:50.9997,lng:6.8065,type:'能源系统商',channel:'Wärmepumpe + PV + Wallbox + EMS',priority:2,score:88,source:'https://de.linkedin.com/company/heizfix',why:'年轻的热泵/PV 系统商，适合了解标准化安装包和新渠道打法。',observe:'产品包、定价、客户教育、标准化交付。',questions:'他们是否愿意把智能加热棒作为 PV/WP add-on？'},
+ {id:'wegatech',name:'Wegatech',city:'Köln',address:'Venloer Str. 301-303, 50823 Köln',lat:50.9502,lng:6.9210,type:'能源系统商',channel:'PV + Speicher + Wärmepumpe',priority:2,score:86,source:'https://de.linkedin.com/company/wegatech-greenergy-gmbh',why:'家庭能源系统整合商，适合从市场和销售链路角度理解热水负载是否被纳入能源方案。',observe:'线上获客、整包方案、PV/储能/热泵的销售优先级。',questions:'为什么热水电加热没有成为家庭能源系统标准模块？'}
+];
+const priorityIds = ['elements-dus','zuk-dus','haus-waerme','sally','neotherm','zuk-dormagen','elmer-koeln','rasch','paul','schnorrenberg'];
+const selectionStorageKey = 'selectedPlaces';
+const mapHome = [origin.lat, origin.lng];
+let showSelectedOnly = false;
+const icons = {
+ '展厅': '#2563eb', 'SHK Großhandel':'#059669', '安装商':'#ea580c', '能源系统商':'#7c3aed'
+};
+function pin(color, selected=true){
+ const size=selected?22:14;
+ const border=selected?4:2;
+ const opacity=selected?1:.38;
+ const shadow=selected?'0 3px 12px rgba(0,0,0,.38)':'0 1px 4px rgba(0,0,0,.18)';
+ return L.divIcon({className:'',html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:${border}px solid white;box-shadow:${shadow};opacity:${opacity}"></div>`,iconSize:[size,size],iconAnchor:[size/2,size/2]});
+}
+let map = null; let markers = new Map(); let routeLine = null;
+function mapPoint(p){return `${p.name ? p.name + ', ' : ''}${p.address}, Germany`}
+function googleSearch(p){return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(mapPoint(p))}
+function osmLink(p){return `https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=16/${p.lat}/${p.lng}`}
+function popupHtml(p){return `<div class="popup"><h3>${p.name}</h3><p><b>类型：</b>${p.type}｜${p.channel}</p><p><b>地址：</b>${p.address}</p><p><b>为什么去：</b>${p.why}</p><p><b>现场看：</b>${p.observe}</p><div class="q"><b>建议问题：</b>${p.questions}</div><p><a href="${googleSearch(p)}" target="_blank" rel="noopener noreferrer">Google Maps</a> · <a href="${osmLink(p)}" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · <a href="${p.source}" target="_blank" rel="noopener noreferrer">来源</a></p></div>`}
+function initMap(){
+ map = L.map('map').setView(mapHome, 11);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+ L.marker([origin.lat, origin.lng], {icon:pin('#111827')}).addTo(map).bindPopup(`<b>${origin.name}</b><br>${origin.address}<br>出发点`);
+ places.forEach(p=>{const m=L.marker([p.lat,p.lng],{icon:pin(icons[p.type]||'#666')}).addTo(map).bindPopup(popupHtml(p));markers.set(p.id,m);});
+ updateMarkerStyles();
+ setMapStatus('');
+}
+function readSelectedIds(){
+ try{
+   const ids=JSON.parse(localStorage.getItem(selectionStorageKey)||'[]');
+   if(!Array.isArray(ids))return [];
+   const known=new Set(places.map(p=>p.id));
+   return [...new Set(ids.filter(id=>known.has(id)))];
+ }catch(e){return [];}
+}
+function writeSelectedIds(ids){localStorage.setItem(selectionStorageKey, JSON.stringify([...new Set(ids)]));}
+function selectedIds(){return readSelectedIds()}
+function selectedSet(){return new Set(selectedIds())}
+function ensureInitialSelection(){if(localStorage.getItem(selectionStorageKey)===null)writeSelectedIds(priorityIds)}
+function updateSelectionSummary(visibleCount){
+ const count=selectedIds().length;
+ const msg=count ? `已选 ${count} / ${places.length} 个点；当前列表显示 ${visibleCount} 个。` : `还没有选择点位；可以先用“推荐 10 个”。`;
+ document.getElementById('selectionSummary').textContent=msg;
+ document.getElementById('routeCount').textContent=`已选 ${count} 个`;
+}
+function openPlace(id){
+ const p=places.find(place=>place.id===id);
+ const marker=markers.get(id);
+ if(!p || !map || !marker)return;
+ marker.openPopup();
+ map.setView([p.lat,p.lng], Math.max(map.getZoom(), 13), {animate:true});
+}
+function updateMarkerStyles(){
+ if(!window.L || !markers.size)return;
+ const selected=selectedSet();
+ places.forEach(p=>{
+   const marker=markers.get(p.id);
+   if(marker)marker.setIcon(pin(icons[p.type]||'#666', selected.has(p.id)));
+ });
+}
+function focusSelectedArea(route){
+ if(!map)return;
+ const maxDistance=route.reduce((max,p)=>Math.max(max,dist(origin,p)),0);
+ const zoom=maxDistance>35?10:11;
+ if(!route.length){
+   map.setView(mapHome, 11);
+   return;
+ }
+ if(route.length===1){
+   map.setView(mapHome, zoom, {animate:true});
+   return;
+ }
+ map.setView(mapHome, zoom, {animate:true});
+}
+function setSelection(ids){
+ writeSelectedIds(ids);
+ renderList();
+ buildRoute();
+}
+function toggleSelection(id, checked){
+ const ids=selectedSet();
+ if(checked)ids.add(id); else ids.delete(id);
+ setSelection([...ids]);
+}
+function renderList(){
+ const q=document.getElementById('search').value.trim().toLowerCase();
+ const enabled=[...document.querySelectorAll('#filters input:checked')].map(x=>x.value);
+ const selected=selectedSet();
+ const box=document.getElementById('list'); box.innerHTML='';
+ const visible=places.filter(p=>enabled.includes(p.type)).filter(p=>!showSelectedOnly || selected.has(p.id)).filter(p=>{const hay=(p.name+' '+p.city+' '+p.type+' '+p.channel+' '+p.why+' '+p.observe).toLowerCase(); return !q || hay.includes(q)}).sort((a,b)=>Number(selected.has(b.id))-Number(selected.has(a.id))||a.priority-b.priority||b.score-a.score);
+ document.getElementById('listCount').textContent=`显示 ${visible.length} 个`;
+ document.getElementById('showSelected').classList.toggle('active', showSelectedOnly);
+ updateSelectionSummary(visible.length);
+ if(!visible.length){
+   box.innerHTML='<div class="empty">没有匹配的点位。可以清空搜索词、关闭“只看已选”，或恢复全部类型。</div>';
+   return;
+ }
+ visible.forEach(p=>{
+   const isSelected=selected.has(p.id);
+   const el=document.createElement('div'); el.className=`item${isSelected?' selected':''}`; el.dataset.id=p.id;
+   el.innerHTML=`<div class="topline"><label class="name"><input type="checkbox" class="pick" data-id="${p.id}" ${isSelected?'checked':''}> <span>${p.name}</span></label><span class="tag priority">${p.score}</span></div><div class="meta"><span class="tag">${p.city}</span><span class="tag channel">${p.type}</span><span class="tag">${p.channel}</span></div><div class="addr">${p.address}</div><div class="why">${p.why}</div><div class="links"><a class="btn" target="_blank" rel="noopener noreferrer" href="${googleSearch(p)}">Google Maps</a><a class="btn" target="_blank" rel="noopener noreferrer" href="${osmLink(p)}">OSM</a><a class="btn" target="_blank" rel="noopener noreferrer" href="${p.source}">来源</a></div>`;
+   el.addEventListener('click',e=>{if(e.target.closest('a,input,label'))return; openPlace(p.id);});
+   el.querySelector('.pick').addEventListener('change',e=>toggleSelection(p.id,e.target.checked));
+   box.appendChild(el);
+ });
+}
+function dist(a,b){const R=6371, dLat=(b.lat-a.lat)*Math.PI/180, dLng=(b.lng-a.lng)*Math.PI/180; const la1=a.lat*Math.PI/180, la2=b.lat*Math.PI/180; const h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)**2; return 2*R*Math.asin(Math.sqrt(h));}
+function optimize(points){let current=origin; const left=[...points]; const route=[]; while(left.length){left.sort((a,b)=>dist(current,a)-dist(current,b)); const n=left.shift(); route.push(n); current=n;} return route;}
+function chunkRoute(route){
+ const chunks=[];
+ for(let i=0;i<route.length;i+=googleMaxVisitsPerRoute){
+   const visits=route.slice(i,i+googleMaxVisitsPerRoute);
+   const start=i===0?origin:route[i-1];
+   chunks.push({start, visits});
+ }
+ return chunks;
+}
+function mapsDir(segment){if(!segment.visits.length)return '#'; const dest=segment.visits[segment.visits.length-1]; const w=segment.visits.slice(0,-1).map(mapPoint).join('|'); let url='https://www.google.com/maps/dir/?api=1&travelmode=driving&origin='+encodeURIComponent(mapPoint(segment.start))+'&destination='+encodeURIComponent(mapPoint(dest)); if(w) url+='&waypoints='+encodeURIComponent(w); return url;}
+function googleMapsMulti(routes){return routes.map((segment,idx)=>`<a class="btn primary" target="_blank" rel="noopener noreferrer" href="${mapsDir(segment)}">Google Maps 路线${routes.length>1?' '+(idx+1):''}</a>`).join('');}
+function buildRoute(){
+ const ids=selectedIds(); const pts=ids.map(id=>places.find(p=>p.id===id)).filter(Boolean); const route=optimize(pts);
+ if(map){
+   if(routeLine) map.removeLayer(routeLine);
+   updateMarkerStyles();
+   if(route.length){
+     const latlngs=[[origin.lat,origin.lng],...route.map(p=>[p.lat,p.lng])]; routeLine=L.polyline(latlngs,{color:'#0f6bff',weight:4,opacity:.65,dashArray:'8,7'}).addTo(map);
+   }
+  }
+ const chunks=chunkRoute(route);
+ const total=route.reduce((sum,p,i)=>sum+dist(i?route[i-1]:origin,p),0);
+ document.getElementById('routeCount').textContent=`已选 ${route.length} 个`;
+ document.getElementById('routeDistance').textContent=route.length?`约 ${total.toFixed(1)} km`:'约 0 km';
+ document.getElementById('routeOutput').innerHTML = route.length? `<p class="small">已按当前位置粗略优化；真实路线和时间以 Google Maps 为准。导航链接会自动分段，后一段从上一段终点继续。</p><ol>${route.map((p,i)=>`<li><b>${i+1}. ${p.name}</b><br><span class="small">${p.address}<br>${p.observe}</span></li>`).join('')}</ol><div class="links">${googleMapsMulti(chunks)}</div><p class="small">建议预约顺序：先 Großhandel/展厅，再安装商；如果选了 Köln 东南/右岸点位，建议单独半天。</p>` : `<p class="small">左侧选择点位后，这里会自动生成建议顺序和 Google Maps 分段导航。</p>`;
+ if(map)requestAnimationFrame(()=>{map.invalidateSize(); focusSelectedArea(route);});
+}
+document.getElementById('buildRoute').onclick=buildRoute;
+document.getElementById('selectAll').onclick=()=>setSelection(places.map(p=>p.id));
+document.getElementById('clearAll').onclick=()=>{showSelectedOnly=false; setSelection([]);};
+document.getElementById('selectTop10').onclick=()=>setSelection(priorityIds);
+document.getElementById('showSelected').onclick=()=>{showSelectedOnly=!showSelectedOnly; renderList();};
+document.getElementById('search').oninput=renderList; document.querySelectorAll('#filters input').forEach(f=>f.onchange=renderList);
+async function start(){
+ ensureInitialSelection();
+ renderList();
+ if(await ensureLeaflet()) initMap();
+ else setMapStatus('地图组件加载失败。请检查网络，或直接使用左侧 Google Maps / OSM 链接打开地点。', true);
+ buildRoute();
+}
+start();
+</script>
+</body>
+</html>
